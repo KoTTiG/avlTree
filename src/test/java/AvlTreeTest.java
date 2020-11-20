@@ -34,6 +34,7 @@ public class AvlTreeTest {
         int startHeight = testTree.height();
         assertTrue(testTree.remove(toRemove), ""+toRemove);
         assertFalse(testTree.remove(toRemove));
+        assertFalse(testTree.contains(toRemove));
         assertTrue(testTree.height() <= startHeight);
     }
 }

@@ -1,8 +1,9 @@
-import java.util.AbstractSet;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
-public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
+import jdk.jshell.spi.ExecutionControl;
+
+import java.util.*;
+
+public class AvlTree<T extends Comparable<T>> implements Set<T> {
 
     private static class Node<T> {
         final T value;
@@ -63,8 +64,30 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
         }
     }
 
+    @Override
+    public boolean contains(Object o) {
+        if (o == null || o.getClass() != root.value.getClass()) return false;
+        return contains(root, (T) o);
+
+    }
+
+    private boolean contains(Node<T> node, T value) {
+        if (node == null) {
+            return false;
+        }
+        int comparison = value.compareTo(node.value);
+        if (comparison > 0) {
+            return  contains(node.right, value);
+        } else if (comparison < 0) {
+            return contains(node.left, value);
+        } else {
+            return true;
+        }
+    }
+
     boolean wasAdded;
 
+    @Override
     public boolean add(T value) {
         wasAdded = false;
         root = add(root, value);
@@ -92,14 +115,15 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
 
     boolean wasRemoved;
 
-    public boolean remove(T value) {
+    @Override
+    public boolean remove(Object o) {
+        if (o == null || o.getClass() != root.value.getClass()) return false;
         wasRemoved = false;
-        root = remove(root, value);
+        root = remove(root, (T) o);
         return wasRemoved;
     }
 
     private Node<T> remove(Node<T> node, T value) {
-
         if (node == null) {
             return null;
         }
@@ -126,13 +150,71 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
 
     private Node<T> findMin(Node<T> node) {
         if (node == null) return null;
-        return node.left == null? node : findMin(node.left);
+        return node.left == null ? node : findMin(node.left);
     }
 
     private Node<T> removeMin(Node<T> node) {
         if (node.left == null) return node.right;
         node.left = removeMin(node.left);
         return balance(node);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        while(c.iterator().hasNext()){
+            if (!this.contains(c.iterator().next())) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends T> c) {
+        boolean hasChanged = false;
+        while(c.iterator().hasNext()){
+            if (this.add(c.iterator().next())) hasChanged = true;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        return false;
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        boolean hasChanged = false;
+        while(c.iterator().hasNext()){
+            if (this.remove(c.iterator().next())) hasChanged = true;
+        }
+        return true;
+    }
+
+    @Override
+    public void clear() {
+        root = null;
+        size = 0;
+    }
+
+    @Override
+    public Object[] toArray() {
+        Object[] array = new Object[size];
+        for (int i = 0; i < size; i++){
+            array[i] = this.iterator().next();
+        }
+        return array;
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        if (a.length >= size){
+            for (int i = 0; i < size; i++){
+                a[i] = (T) this.iterator().next();
+            }
+            return a;
+        }else {
+            return (T[]) this.toArray();
+        }
     }
 
     public Iterator<T> iterator() {
@@ -156,22 +238,21 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
         private Node<T> findNext(Node<T> node) {
             Node<T> current = root;
             Node<T> successor = null;
-            while (current != null){
+            while (current != null) {
                 if (current.value.compareTo(node.value) > 0) {
                     successor = current;
                     current = current.left;
-                }
-                else current = current.right;
+                } else current = current.right;
             }
             return successor;
         }
 
         @Override
         public T next() {
-            if(index == size) throw new NoSuchElementException();
+            if (index == size) throw new NoSuchElementException();
             if (next == null && index == 0) {
                 next = findMin(root);
-            }else {
+            } else {
                 next = findNext(next);
             }
             index++;
@@ -193,9 +274,26 @@ public class AvlTree<T extends Comparable<T>> extends AbstractSet<T> {
         return size;
     }
 
+    @Override
+    public boolean isEmpty() {
+        return size==0;
+    }
+
     public int height() {
         return root.height;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AvlTree<?> avlTree = (AvlTree<?>) o;
+        return size == avlTree.size &&
+                Objects.equals(root, avlTree.root);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(root, size);
+    }
 }
