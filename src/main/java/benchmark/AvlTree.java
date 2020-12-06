@@ -1,6 +1,4 @@
-
-import jdk.jshell.spi.ExecutionControl;
-
+package benchmark;
 import java.util.*;
 
 public class AvlTree<T extends Comparable<T>> implements Set<T> {
@@ -66,7 +64,7 @@ public class AvlTree<T extends Comparable<T>> implements Set<T> {
 
     @Override
     public boolean contains(Object o) {
-        if (o == null || o.getClass() != root.value.getClass()) return false;
+        if (root == null|| o == null || o.getClass() != root.value.getClass()) return false;
         return contains(root, (T) o);
 
     }
@@ -117,7 +115,7 @@ public class AvlTree<T extends Comparable<T>> implements Set<T> {
 
     @Override
     public boolean remove(Object o) {
-        if (o == null || o.getClass() != root.value.getClass()) return false;
+        if (root == null|| o == null || o.getClass() != root.value.getClass()) return false;
         wasRemoved = false;
         root = remove(root, (T) o);
         return wasRemoved;

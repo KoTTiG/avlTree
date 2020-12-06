@@ -1,11 +1,12 @@
+import benchmark.AvlTree;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
-import static java.lang.Math.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static java.lang.Math.random;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AvlTreeTest {
     @Test
